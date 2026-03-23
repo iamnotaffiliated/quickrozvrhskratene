@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Školský Rozvrh - II.A</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --dim: #94a3b8;
+            --green: #22c55e;
+            --orange: #fbbf24;
+        }
+
+        body.light-mode {
+            --bg: #f1f5f9;
+            --card: #ffffff;
+            --accent: #0284c7;
+            --text: #0f172a;
+            --dim: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container { width: 100%; max-width: 450px; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 5px;
+        }
+
+        #theme-toggle {
+            background: var(--card);
+            border: 1px solid var(--dim);
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .main-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        #progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+            transition: width 1s linear;
+        }
+
+        .status-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); margin-bottom: 5px; }
+        #current-task { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; }
+        #timer { font-size: 4rem; font-weight: 800; line-height: 1; margin: 10px 0; font-variant-numeric: tabular-nums; }
+
+        .schedule-grid { display: flex; flex-direction: column; gap: 10px; }
+
+        .row {
+            display: grid;
+            grid-template-columns: 45px 1fr 100px;
+            background: var(--card);
+            padding: 16px;
+            border-radius: 16px;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+
+        .row.active {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+            transform: scale(1.02);
+        }
+
+        .row.next { border: 1px dashed var(--dim); opacity: 0.9; }
+        .row.past { opacity: 0.4; filter: grayscale(1); }
+
+        .row .num { font-weight: 800; color: var(--accent); font-size: 1.1rem; }
+        .row .name { font-weight: 600; }
+        .row .time { text-align: right; color: var(--dim); font-size: 0.85rem; }
+
+        .footer { text-align: center; margin-top: 30px; color: var(--dim); font-size: 0.8rem; padding-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div>
+                <h2 id="date-display" style="font-size: 1rem;">Načítavam...</h2>
+            </div>
+            <button id="theme-toggle" onclick="toggleTheme()">🌓 Režim</button>
+        </header>
+
+        <div class="main-card">
+            <div id="status-label" class="status-label">Aktuálne</div>
+            <div id="current-task">Priprav sa na školu</div>
+            <div id="timer">00:00</div>
+            <div id="sub-msg" style="font-size: 0.85rem; color: var(--dim);"></div>
+            <div class="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="schedule-grid" id="schedule-box">
+            </div>
+
+        <div class="footer">
+            Režim: Skrátené vyučovanie (30min)<br>
+            Vytvorené pre II.A
+        </div>
+    </div>
+
+    <script>
+        const lessons = [
+            { id: 1, name: "BIO", start: "07:55", end: "08:25" },
+            { id: 2, name: "DEJ", start: "08:35", end: "09:05" },
+            { id: 3, name: "SJL", start: "09:15", end: "09:45" },
+            { id: 4, name: "MAT", start: "10:05", end: "10:35" },
+            { id: 5, name: "ANJ", start: "10:45", end: "11:15" },
+            { id: 6, name: "FYZ", start: "11:25", end: "11:55" },
+            { id: 7, name: "NBV", start: "12:05", end: "12:35" }
+        ];
+
+        function toMin(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        function update() {
+            const now = new Date();
+            const cur = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
+            
+            document.getElementById('date-display').innerText = now.toLocaleDateString('sk-SK', { weekday: 'long', day: 'numeric', month: 'long' });
+
+            let activeIdx = -1;
+            let isBreak = false;
+            let timeRemaining = 0;
+            let percent = 0;
+
+            // Logika hľadania aktuálneho stavu
+            for (let i = 0; i < lessons.length; i++) {
+                const s = toMin(lessons[i].start);
+                const e = toMin(lessons[i].end);
+
+                if (cur >= s && cur < e) {
+                    activeIdx = i;
+                    isBreak = false;
+                    timeRemaining = e - cur;
+                    percent = ((cur - s) / (e - s)) * 100;
+                    break;
+                }
+                
+                if (i < lessons.length - 1) {
+                    const nextS = toMin(lessons[i+1].start);
+                    if (cur >= e && cur < nextS) {
+                        activeIdx = i;
+                        isBreak = true;
+                        timeRemaining = nextS - cur;
+                        percent = ((cur - e) / (nextS - e)) * 100;
+                        break;
+                    }
+                }
+            }
+
+            // Update UI karty
+            const label = document.getElementById('status-label');
+            const task = document.getElementById('current-task');
+            const timer = document.getElementById('timer');
+            const bar = document.getElementById('progress-bar');
+            const sub = document.getElementById('sub-msg');
+
+            if (activeIdx !== -1) {
+                if (isBreak) {
+                    label.innerText = "Prestávka";
+                    task.innerText = "Pred: " + lessons[activeIdx+1].name;
+                    timer.style.color = "var(--orange)";
+                    sub.innerText = "Máš čas na kávu/vodu";
+                } else {
+                    label.innerText = "Práve prebieha";
+                    task.innerText = lessons[activeIdx].id + ". " + lessons[activeIdx].name;
+                    timer.style.color = "var(--green)";
+                    sub.innerText = "Koniec o " + lessons[activeIdx].end;
+                }
+                
+                const mins = Math.floor(timeRemaining);
+                const secs = Math.floor((timeRemaining - mins) * 60);
+                timer.innerText = `${mins}:${secs.toString().padStart(2, '0')}`;
+                bar.style.width = percent + "%";
+            } else {
+                if (cur < toMin(lessons[0].start)) {
+                    task.innerText = "Škola ešte nezačala";
+                    timer.innerText = "😴";
+                } else {
+                    task.innerText = "Vyučovanie skončilo";
+                    timer.innerText = "🏠";
+                    sub.innerText = "Vidíme sa zajtra!";
+                }
+                bar.style.width = "0%";
+            }
+
+            // Render listu
+            const box = document.getElementById('schedule-box');
+            box.innerHTML = lessons.map((l, i) => {
+                let cls = "";
+                if (i === activeIdx && !isBreak) cls = "active";
+                else if (isBreak && i === activeIdx + 1) cls = "next";
+                else if (toMin(l.end) < cur) cls = "past";
+
+                return `
+                    <div class="row ${cls}">
+                        <div class="num">${l.id}.</div>
+                        <div class="name">${l.name}</div>
+                        <div class="time">${l.start} — ${l.end}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        setInterval(update, 1000);
+        update();
+    </script>
+</body>
+</html>
