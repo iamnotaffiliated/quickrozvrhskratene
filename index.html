@@ -142,18 +142,18 @@
 
         <div class="footer">
             Režim: Skrátené vyučovanie (30min)<br>
-            Vytvorené pre II.A
+            Vytvorené pre II.B
         </div>
     </div>
 
     <script>
         const lessons = [
-            { id: 1, name: "BIO", start: "07:55", end: "08:25" },
-            { id: 2, name: "DEJ", start: "08:35", end: "09:05" },
-            { id: 3, name: "SJL", start: "09:15", end: "09:45" },
-            { id: 4, name: "MAT", start: "10:05", end: "10:35" },
-            { id: 5, name: "ANJ", start: "10:45", end: "11:15" },
-            { id: 6, name: "FYZ", start: "11:25", end: "11:55" },
+            { id: 1, name: "NEJ", start: "07:55", end: "08:25" },
+            { id: 2, name: "FYZ", start: "08:35", end: "09:05" },
+            { id: 3, name: "DEJ", start: "09:15", end: "09:45" },
+            { id: 4, name: "ANJ", start: "10:05", end: "10:35" },
+            { id: 5, name: "SJL", start: "10:45", end: "11:15" },
+            { id: 6, name: "UKL", start: "11:25", end: "11:55" },
             { id: 7, name: "NBV", start: "12:05", end: "12:35" }
         ];
 
@@ -211,7 +211,7 @@
                     label.innerText = "Prestávka";
                     task.innerText = "Pred: " + lessons[activeIdx+1].name;
                     timer.style.color = "var(--orange)";
-                    sub.innerText = "Máš čas na kávu/vodu";
+                    sub.innerText = "Je prestavka";
                 } else {
                     label.innerText = "Práve prebieha";
                     task.innerText = lessons[activeIdx].id + ". " + lessons[activeIdx].name;
