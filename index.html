@@ -9,23 +9,19 @@
         :root { --bg: #0b0e14; --card: #161b22; --accent: #58a6ff; --text: #c9d1d9; --green: #3fb950; --orange: #d29922; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 400px; }
-        
         .class-selector { display: flex; gap: 10px; margin-bottom: 15px; width: 100%; }
         .class-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #30363d; background: var(--card); color: var(--text); cursor: pointer; font-weight: bold; }
         .class-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-
         .main-card { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #30363d; margin-bottom: 20px; }
         #timer { font-size: 4.5rem; font-weight: 900; margin: 10px 0; color: var(--accent); line-height: 1; }
         .label { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; color: #8b949e; margin-bottom: 8px; }
         #subject { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
-        
         .list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
         .item { background: var(--card); padding: 15px; border-radius: 12px; display: grid; grid-template-columns: 40px 1fr 100px; align-items: center; border: 1px solid transparent; }
         .item.active { border-color: var(--green); background: #1c2128; transform: scale(1.02); }
         .item.past { opacity: 0.3; filter: grayscale(1); }
         .item .n { font-weight: 900; color: var(--accent); }
         .item .t { text-align: right; font-size: 0.8rem; color: #8b949e; }
-        
         .footer { margin-top: 25px; font-size: 0.8rem; color: #484f58; text-align: center; }
     </style>
 </head>
@@ -35,74 +31,65 @@
             <button class="class-btn" id="btn-IIA" onclick="setClass('IIA')">II.A</button>
             <button class="class-btn" id="btn-IIB" onclick="setClass('IIB')">II.B</button>
         </div>
-
         <div class="main-card">
             <div class="label" id="state">Aktuálne</div>
             <div id="subject">Načítavam...</div>
             <div id="timer">--:--</div>
         </div>
-        
         <div class="list" id="schedule-list"></div>
         <div class="footer">Režim: Skrátené vyučovanie (30min)</div>
     </div>
-
     <script>
         const schedules = {
             'IIA': [
-                { id: 1, name: "BIO", s: "07:55", e: "08:25" },
-                { id: 2, name: "DEJ", s: "08:35", e: "09:05" },
-                { id: 3, name: "SJL", s: "09:15", e: "09:45" },
-                { id: 4, name: "MAT", s: "10:05", e: "10:35" },
-                { id: 5, name: "ANJ", s: "10:45", e: "11:15" },
-                { id: 6, name: "FYZ", s: "11:25", e: "11:55" },
-                { id: 7, name: "NBV", s: "12:05", e: "12:35" }
+                { id: 1, name: "BIO", s: "07:55", e: "08:25" }, { id: 2, name: "DEJ", s: "08:35", e: "09:05" }, { id: 3, name: "SJL", s: "09:15", e: "09:45" },
+                { id: 4, name: "MAT", s: "10:05", e: "10:35" }, { id: 5, name: "ANJ", s: "10:45", e: "11:15" }, { id: 6, name: "FYZ", s: "11:25", e: "11:55" }, { id: 7, name: "NBV", s: "12:05", e: "12:35" }
             ],
             'IIB': [
-                { id: 1, name: "NEJ", s: "07:55", e: "08:25" },
-                { id: 2, name: "FYZ", s: "08:35", e: "09:05" },
-                { id: 3, name: "DEJ", s: "09:15", e: "09:45" },
-                { id: 4, name: "ANJ", s: "10:05", e: "10:35" },
-                { id: 5, name: "SJL", s: "10:45", e: "11:15" },
-                { id: 6, name: "UKL", s: "11:25", e: "11:55" },
-                { id: 7, name: "NBV", s: "12:05", e: "12:35" }
+                { id: 1, name: "NEJ", s: "07:55", e: "08:25" }, { id: 2, name: "FYZ", s: "08:35", e: "09:05" }, { id: 3, name: "DEJ", s: "09:15", e: "09:45" },
+                { id: 4, name: "ANJ", s: "10:05", e: "10:35" }, { id: 5, name: "SJL", s: "10:45", e: "11:15" }, { id: 6, name: "UKL", s: "11:25", e: "11:55" }, { id: 7, name: "NBV", s: "12:05", e: "12:35" }
             ]
         };
-
         let currentClass = localStorage.getItem('selectedClass') || 'IIA';
-
         function setClass(cl) {
-            currentClass = cl;
-            localStorage.setItem('selectedClass', cl);
+            currentClass = cl; localStorage.setItem('selectedClass', cl);
             document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + cl).classList.add('active');
-            tick();
+            document.getElementById('btn-' + cl).classList.add('active'); tick();
         }
-
         function toM(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
-
         function tick() {
             const lessons = schedules[currentClass];
             const now = new Date();
             const cur = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
-            
-            let activeIdx = -1;
-            let isBreak = false;
-            let timeRem = 0;
-
+            let activeIdx = -1, isBreak = false, timeRem = 0;
             for (let i = 0; i < lessons.length; i++) {
-                const s = toM(lessons[i].s);
-                const e = toM(lessons[i].e);
+                const s = toM(lessons[i].s), e = toM(lessons[i].e);
                 if (cur >= s && cur < e) { activeIdx = i; isBreak = false; timeRem = e - cur; break; }
                 if (i < lessons.length - 1 && cur >= e && cur < toM(lessons[i+1].s)) {
                     activeIdx = i; isBreak = true; timeRem = toM(lessons[i+1].s) - cur; break;
                 }
             }
-
-            const timerEl = document.getElementById('timer');
-            const subjEl = document.getElementById('subject');
-            const stateEl = document.getElementById('state');
-
+            const timerEl = document.getElementById('timer'), subjEl = document.getElementById('subject'), stateEl = document.getElementById('state');
             if (activeIdx !== -1) {
+                if (isBreak) {
+                    stateEl.innerText = "Prestávka končí o"; subjEl.innerText = "Nasleduje " + lessons[activeIdx+1].name; timerEl.style.color = "var(--orange)";
+                } else {
+                    stateEl.innerText = "Koniec hodiny o"; subjEl.innerText = lessons[activeIdx].name; timerEl.style.color = "var(--green)";
+                }
+                const m = Math.floor(timeRem), s = Math.floor((timeRem - m) * 60);
+                timerEl.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+            } else {
+                subjEl.innerText = cur < toM(lessons[0].s) ? "Čakaj na začiatok" : "Padla! 🏠"; timerEl.innerText = "--:--";
+            }
+            document.getElementById('schedule-list').innerHTML = lessons.map((l, i) => {
+                let cls = ""; if (activeIdx === i && !isBreak) cls = "active"; if (toM(l.e) < cur) cls = "past";
+                return `<div class="item ${cls}"><div class="n">${l.id}.</div><div>${l.name}</div><div class="t">${l.s}-${l.e}</div></div>`;
+            }).join('');
+        }
+        setClass(currentClass); setInterval(tick, 1000);
+    </script>
+</body>
+</html>
                 if (isBreak) {
                     stateEl.innerText = "Prestávka končí o";
                     subjEl.innerText = "Nasleduje " + lessons[activeIdx+1].name;
