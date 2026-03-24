@@ -2,216 +2,139 @@
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Školský Rozvrh - II.A</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>Rozvrh Skrátený</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #38bdf8;
-            --text: #f8fafc;
-            --dim: #94a3b8;
-            --green: #22c55e;
-            --orange: #fbbf24;
-        }
+        :root { --bg: #0b0e14; --card: #161b22; --accent: #58a6ff; --text: #c9d1d9; --green: #3fb950; --orange: #d29922; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 400px; }
+        
+        .class-selector { display: flex; gap: 10px; margin-bottom: 15px; width: 100%; }
+        .class-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #30363d; background: var(--card); color: var(--text); cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .class-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        body.light-mode {
-            --bg: #f1f5f9;
-            --card: #ffffff;
-            --accent: #0284c7;
-            --text: #0f172a;
-            --dim: #64748b;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            transition: background 0.3s, color 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 15px;
-        }
-
-        .container { width: 100%; max-width: 450px; }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 0 5px;
-        }
-
-        #theme-toggle {
-            background: var(--card);
-            border: 1px solid var(--dim);
-            color: var(--text);
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-
-        .main-card {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 24px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-        }
-
-        #progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--accent);
-            transition: width 1s linear;
-        }
-
-        .status-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); margin-bottom: 5px; }
-        #current-task { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; }
-        #timer { font-size: 4rem; font-weight: 800; line-height: 1; margin: 10px 0; font-variant-numeric: tabular-nums; }
-
-        .schedule-grid { display: flex; flex-direction: column; gap: 10px; }
-
-        .row {
-            display: grid;
-            grid-template-columns: 45px 1fr 100px;
-            background: var(--card);
-            padding: 16px;
-            border-radius: 16px;
-            align-items: center;
-            border: 1px solid transparent;
-            transition: 0.2s;
-        }
-
-        .row.active {
-            border-color: var(--accent);
-            background: rgba(56, 189, 248, 0.1);
-            transform: scale(1.02);
-        }
-
-        .row.next { border: 1px dashed var(--dim); opacity: 0.9; }
-        .row.past { opacity: 0.4; filter: grayscale(1); }
-
-        .row .num { font-weight: 800; color: var(--accent); font-size: 1.1rem; }
-        .row .name { font-weight: 600; }
-        .row .time { text-align: right; color: var(--dim); font-size: 0.85rem; }
-
-        .footer { text-align: center; margin-top: 30px; color: var(--dim); font-size: 0.8rem; padding-bottom: 20px; }
+        .main-card { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #30363d; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #timer { font-size: 4.5rem; font-weight: 900; margin: 10px 0; font-variant-numeric: tabular-nums; color: var(--accent); }
+        .label { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; color: #8b949e; }
+        #subject { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
+        
+        .list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .item { background: var(--card); padding: 15px; border-radius: 12px; display: grid; grid-template-columns: 40px 1fr 100px; align-items: center; border: 1px solid transparent; opacity: 0.8; }
+        .item.active { border-color: var(--green); opacity: 1; transform: scale(1.03); background: #1c2128; }
+        .item.past { opacity: 0.3; }
+        .item .n { font-weight: 900; color: var(--accent); }
+        .item .t { text-align: right; font-size: 0.8rem; color: #8b949e; }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <header>
-            <div>
-                <h2 id="date-display" style="font-size: 1rem;">Načítavam...</h2>
-            </div>
-            <button id="theme-toggle" onclick="toggleTheme()">🌓 Režim</button>
-        </header>
+        <div class="class-selector">
+            <button class="class-btn" id="btn-IIA" onclick="setClass('IIA')">II.A</button>
+            <button class="class-btn" id="btn-IIB" onclick="setClass('IIB')">II.B</button>
+        </div>
 
         <div class="main-card">
-            <div id="status-label" class="status-label">Aktuálne</div>
-            <div id="current-task">Priprav sa na školu</div>
+            <div class="label" id="state">Aktuálne</div>
+            <div id="subject">Načítavam...</div>
             <div id="timer">00:00</div>
-            <div id="sub-msg" style="font-size: 0.85rem; color: var(--dim);"></div>
-            <div class="progress-container">
-                <div id="progress-bar"></div>
-            </div>
+            <div id="next-info" style="font-size: 0.9rem; color: var(--orange);"></div>
         </div>
-
-        <div class="schedule-grid" id="schedule-box">
-            </div>
-
-        <div class="footer">
-            Režim: Skrátené vyučovanie (30min)<br>
-            Vytvorené pre II.A
-        </div>
+        <div class="list" id="schedule-list"></div>
     </div>
 
     <script>
-        const lessons = [
-            { id: 1, name: "BIO", start: "07:55", end: "08:25" },
-            { id: 2, name: "DEJ", start: "08:35", end: "09:05" },
-            { id: 3, name: "SJL", start: "09:15", end: "09:45" },
-            { id: 4, name: "MAT", start: "10:05", end: "10:35" },
-            { id: 5, name: "ANJ", start: "10:45", end: "11:15" },
-            { id: 6, name: "FYZ", start: "11:25", end: "11:55" },
-            { id: 7, name: "NBV", start: "12:05", end: "12:35" }
-        ];
+        const schedules = {
+            'IIA': [
+                { n: 1, s: "07:55", e: "08:25", name: "BIO" },
+                { n: 2, s: "08:35", e: "09:05", name: "DEJ" },
+                { n: 3, s: "09:15", e: "09:45", name: "SJL" },
+                { n: 4, s: "10:05", e: "10:35", name: "MAT" },
+                { n: 5, s: "10:45", e: "11:15", name: "ANJ" },
+                { n: 6, s: "11:25", e: "11:55", name: "FYZ" },
+                { n: 7, s: "12:05", e: "12:35", name: "NBV" }
+            ],
+            'IIB': [
+                { n: 1, s: "07:55", e: "08:25", name: "NEJJ" },
+                { n: 2, s: "08:35", e: "09:05", name: "FYZ" },
+                { n: 3, s: "09:15", e: "09:45", name: "DEJ" },
+                { n: 4, s: "10:05", e: "10:35", name: "ANJ" },
+                { n: 5, s: "10:45", e: "11:15", name: "SJL" },
+                { n: 6, s: "11:25", e: "11:55", name: "UKL" },
+                { n: 7, s: "12:05", e: "12:35", name: "NBV" }
+            ]
+        };
 
-        function toMin(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+        let currentClass = localStorage.getItem('selectedClass') || 'IIA';
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-mode');
+        function setClass(cl) {
+            currentClass = cl;
+            localStorage.setItem('selectedClass', cl);
+            document.querySelectorAll('.class-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + cl).classList.add('active');
+            tick();
         }
 
-        function update() {
+        function toM(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+
+        function tick() {
+            const lessons = schedules[currentClass];
             const now = new Date();
             const cur = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
-            
-            document.getElementById('date-display').innerText = now.toLocaleDateString('sk-SK', { weekday: 'long', day: 'numeric', month: 'long' });
-
             let activeIdx = -1;
             let isBreak = false;
-            let timeRemaining = 0;
-            let percent = 0;
 
-            // Logika hľadania aktuálneho stavu
+            const listEl = document.getElementById('schedule-list');
+            const timerEl = document.getElementById('timer');
+            const subjEl = document.getElementById('subject');
+            const stateEl = document.getElementById('state');
+
             for (let i = 0; i < lessons.length; i++) {
-                const s = toMin(lessons[i].start);
-                const e = toMin(lessons[i].end);
-
-                if (cur >= s && cur < e) {
-                    activeIdx = i;
-                    isBreak = false;
-                    timeRemaining = e - cur;
-                    percent = ((cur - s) / (e - s)) * 100;
-                    break;
-                }
-                
-                if (i < lessons.length - 1) {
-                    const nextS = toMin(lessons[i+1].start);
-                    if (cur >= e && cur < nextS) {
-                        activeIdx = i;
-                        isBreak = true;
-                        timeRemaining = nextS - cur;
-                        percent = ((cur - e) / (nextS - e)) * 100;
-                        break;
-                    }
+                const s = toM(lessons[i].s);
+                const e = toM(lessons[i].e);
+                if (cur >= s && cur < e) { activeIdx = i; isBreak = false; break; }
+                if (i < lessons.length - 1 && cur >= e && cur < toM(lessons[i+1].s)) {
+                    activeIdx = i; isBreak = true; break;
                 }
             }
 
-            // Update UI karty
-            const label = document.getElementById('status-label');
-            const task = document.getElementById('current-task');
-            const timer = document.getElementById('timer');
-            const bar = document.getElementById('progress-bar');
-            const sub = document.getElementById('sub-msg');
-
             if (activeIdx !== -1) {
+                if (isBreak) {
+                    const nextS = toM(lessons[activeIdx+1].s);
+                    stateEl.innerText = "Prestávka končí o";
+                    subjEl.innerText = "Nasleduje " + lessons[activeIdx+1].name;
+                    timerEl.innerText = Math.ceil(nextS - cur) + "m";
+                    timerEl.style.color = "var(--orange)";
+                } else {
+                    const end = toM(lessons[activeIdx].e);
+                    stateEl.innerText = "Koniec hodiny o";
+                    subjEl.innerText = lessons[activeIdx].name;
+                    timerEl.innerText = Math.ceil(end - cur) + "m";
+                    timerEl.style.color = "var(--green)";
+                }
+            } else {
+                subjEl.innerText = cur < toM(lessons[0].s) ? "Čakaj na začiatok" : "Padla! 🏠";
+                timerEl.innerText = "--";
+            }
+
+            listEl.innerHTML = lessons.map((l, i) => {
+                let status = "";
+                if (activeIdx === i && !isBreak) status = "active";
+                if (toM(l.e) < cur) status = "past";
+                return `<div class="item ${status}"><div class="n">${l.n}.</div><div>${l.name}</div><div class="t">${l.s}-${l.e}</div></div>`;
+            }).join('');
+        }
+
+        setClass(currentClass);
+        setInterval(tick, 1000);
+    </script>
+</body>
+</html>
                 if (isBreak) {
                     label.innerText = "Prestávka";
                     task.innerText = "Pred: " + lessons[activeIdx+1].name;
                     timer.style.color = "var(--orange)";
-                    sub.innerText = "Máš čas na kávu/vodu";
+                    sub.innerText = "Máš prestávku.";
                 } else {
                     label.innerText = "Práve prebieha";
                     task.innerText = lessons[activeIdx].id + ". " + lessons[activeIdx].name;
