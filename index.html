@@ -11,17 +11,17 @@
         .container { width: 100%; max-width: 400px; }
         
         .class-selector { display: flex; gap: 10px; margin-bottom: 15px; width: 100%; }
-        .class-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #30363d; background: var(--card); color: var(--text); cursor: pointer; font-weight: bold; font-size: 1rem; }
-        .class-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 0 15px rgba(88, 166, 255, 0.3); }
+        .class-btn { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #30363d; background: var(--card); color: var(--text); cursor: pointer; font-weight: bold; }
+        .class-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-        .main-card { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #30363d; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        #timer { font-size: 4.5rem; font-weight: 900; margin: 10px 0; font-variant-numeric: tabular-nums; color: var(--accent); line-height: 1; }
+        .main-card { background: var(--card); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #30363d; margin-bottom: 20px; }
+        #timer { font-size: 4.5rem; font-weight: 900; margin: 10px 0; color: var(--accent); line-height: 1; }
         .label { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 2px; color: #8b949e; margin-bottom: 8px; }
         #subject { font-size: 1.8rem; font-weight: 700; margin-bottom: 5px; }
         
         .list { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        .item { background: var(--card); padding: 15px; border-radius: 12px; display: grid; grid-template-columns: 40px 1fr 100px; align-items: center; border: 1px solid transparent; transition: 0.3s; }
-        .item.active { border-color: var(--green); transform: scale(1.02); background: #1c2128; box-shadow: 0 4px 20px rgba(63, 185, 80, 0.15); }
+        .item { background: var(--card); padding: 15px; border-radius: 12px; display: grid; grid-template-columns: 40px 1fr 100px; align-items: center; border: 1px solid transparent; }
+        .item.active { border-color: var(--green); background: #1c2128; transform: scale(1.02); }
         .item.past { opacity: 0.3; filter: grayscale(1); }
         .item .n { font-weight: 900; color: var(--accent); }
         .item .t { text-align: right; font-size: 0.8rem; color: #8b949e; }
@@ -32,20 +32,18 @@
 <body>
     <div class="container">
         <div class="class-selector">
-            <button class="class-btn" id="btn-IIA" onclick="setClass('IIA')">Trieda II.A</button>
-            <button class="class-btn" id="btn-IIB" onclick="setClass('IIB')">Trieda II.B</button>
+            <button class="class-btn" id="btn-IIA" onclick="setClass('IIA')">II.A</button>
+            <button class="class-btn" id="btn-IIB" onclick="setClass('IIB')">II.B</button>
         </div>
 
         <div class="main-card">
             <div class="label" id="state">Aktuálne</div>
             <div id="subject">Načítavam...</div>
-            <div id="timer">00:00</div>
-            <div id="sub-msg" style="font-size: 0.85rem; color: #8b949e;"></div>
+            <div id="timer">--:--</div>
         </div>
         
         <div class="list" id="schedule-list"></div>
-        
-        <div class="footer">Režim: Skrátené vyučovanie (30min hodiny)</div>
+        <div class="footer">Režim: Skrátené vyučovanie (30min)</div>
     </div>
 
     <script>
@@ -103,6 +101,38 @@
             const timerEl = document.getElementById('timer');
             const subjEl = document.getElementById('subject');
             const stateEl = document.getElementById('state');
+
+            if (activeIdx !== -1) {
+                if (isBreak) {
+                    stateEl.innerText = "Prestávka končí o";
+                    subjEl.innerText = "Nasleduje " + lessons[activeIdx+1].name;
+                    timerEl.style.color = "var(--orange)";
+                } else {
+                    stateEl.innerText = "Koniec hodiny o";
+                    subjEl.innerText = lessons[activeIdx].name;
+                    timerEl.style.color = "var(--green)";
+                }
+                const m = Math.floor(timeRem);
+                const s = Math.floor((timeRem - m) * 60);
+                timerEl.innerText = `${m}:${s.toString().padStart(2, '0')}`;
+            } else {
+                subjEl.innerText = cur < toM(lessons[0].s) ? "Čakaj na začiatok" : "Padla! 🏠";
+                timerEl.innerText = "--:--";
+            }
+
+            document.getElementById('schedule-list').innerHTML = lessons.map((l, i) => {
+                let cls = "";
+                if (activeIdx === i && !isBreak) cls = "active";
+                if (toM(l.e) < cur) cls = "past";
+                return `<div class="item ${cls}"><div class="n">${l.id}.</div><div>${l.name}</div><div class="t">${l.s}-${l.e}</div></div>`;
+            }).join('');
+        }
+
+        setClass(currentClass);
+        setInterval(tick, 1000);
+    </script>
+</body>
+</html>
 
             if (activeIdx !== -1) {
                 if (isBreak) {
